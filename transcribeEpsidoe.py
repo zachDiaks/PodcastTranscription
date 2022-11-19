@@ -10,7 +10,7 @@ import sys
 import checkTranscriptionStatus as StatusChecker
 import time
 
-def transcribeEpisode(url):
+def transcribeEpisode(url,fName):
     # Submit the request
     endpoint = "https://api.assemblyai.com/v2/transcript"
     json = {
@@ -30,16 +30,21 @@ def transcribeEpisode(url):
     statusResponse = StatusChecker.checkStatus(id)
     while(not statusResponse['status'] == 'completed'):
         # Sleep for 2 minutes
-        time.sleep(60*2)
+        time.sleep(120)
         # Check the response again
         statusResponse = StatusChecker.checkStatus(id)
     
     # At this point, the transcription should be complete. Now, let's write the transcription to a file
     transcript = statusResponse['text']
     if not os.path.exists('Transcriptions'):
-        
+        os.mkdir('Transcriptions')
+    
+    # Write the transcript to a text file
+    with open(fName,'w') as f:
+        f.writelines(transcript)
 
 
 if __name__ == "__main__":
     url = sys.argv[1]
-    transcribeEpisode(url)
+    fName = sys.argv[2]
+    transcribeEpisode(url,fName)
