@@ -4,49 +4,17 @@ Some quick and easy command line tools to transcribe podcasts. Initially used in
 # Setup
 This project uses [AssemblyAI's](https://www.assemblyai.com/docs) API for transcription. Once you set up an API key, create an environment variable named `AAI_API_KEY` and set it to your API Key. This is required to run the tool.
 
-# Design Spec
-## Requirements
-* Should be a command line tool
-* User should be able to check on transcription status
-* User should be able to either transcribe one or all episodes of a podcast
-* Data should be stored in some capacity
-* Users should be able to query metadata about a given episode (including the transcription)
-* There should be a consistent scheme for writing transcriptions
-## Data storage options
-For a transcription, writing to a text file should be sufficient. For metadata on the episode, we need a way to perform queries. Data will be stored in json files.
+# Design details
+These tools are intended to be used in Python to perform post-processing tasks. These tools will grab you the audio transcriptions from a given RSS feed for a podcast. The tools are split into classes based on what they do:
+## Transcriber
+This is the main class to use. It will submit a transcription to AssemblyAI and will provide functionality to:
+  1) Check the transcription status
+  2) Write the transcription to a file for future processing
 
-## Functional design
-### For transcribing an episode of a podcast:
-```
-python transcribeEpisode <urlToRSSForEpisode>
-{
-  "id": "5551722-f677-48a6-9287-39c0aafd9ac1",
-  "status": "queued",
-  "acoustic_model": "assemblyai_default",
-  "audio_duration": null,
-  "audio_url": "https://bit.ly/3yxKEIY",
-  "confidence": null,
-  "dual_channel": null,
-  "format_text": true,
-  "language_model": "assemblyai_default",
-  "punctuate": true,
-  "text": null,
-  "utterances": null,
-  "webhook_status_code": null,
-  "webhook_url": null,
-  "words": null,
-  ...
-}
-```
-### For listing all episodes of a podcast:
-```
-python getEpisodeLinks https://anchor.fm/s/55b9a1a4/podcast/rss
-```
-Prints a list of links to all episodes of a given podcast based on the RSS URL of the podcast.
+## PodcastUtils
+This is a class which will provide functionality all things related to the podcast you're trying to transcribe. Currently, it can only parse an RSS feed and extract audio links for each episode. In the future, it might be able to add some metadata about each podcast.
 
-
-## Reminder for me about venv
-To activate:
-```
-& .\venv\Scripts\Activate.ps1
-```
+## Parser
+This is a class which will parse transcribed podcast episodes. It will allow you to:
+  1) Label speakers in the podcast
+  2) Query several transcriptions for certain features (e.g. how often was a word or phrase uttered)

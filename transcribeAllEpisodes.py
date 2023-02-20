@@ -2,18 +2,32 @@
 Transcribe all episodes of a podcast. Check your AssemblyAI dashboard for status.
 '''
 import sys
-import transcribeEpsidoe as Transcriber
-import getEpisodeLinks as Getter
+import os
+from Transcriber import Transcriber
+from PodcastUtils import PodcastUtils
 
-def transcribeAllEpisodes(url):
+def transcribeAllEpisodes(url,fname):
+    # Create classes
+    t = Transcriber(os.environ['AAI_API_KEY'])
+    pu = PodcastUtils()
+
     # Get all podcast episode URLs for the MP3
-    episodeLinks = Getter.parseFeed(url)
+    episodeLinks = pu.episodeLinks(url)
 
     # Transcribe audio for each in a loop
+    numEpisodes = len(episodeLinks)
+    ids = [0] * numEpisodes
+    c = 0
     for episode in episodeLinks:
-        id = Transcriber.batchTranscribeEpisode(episode)
-        print(id)
+        ids[c] = t.submitTranscription(episode)
+        c += 1
+    
+    # Write transcriptions to a file
+    with open(fname,'w') as f:
+        for id in ids:
+            f.writeline(id)
 
 if __name__ == "__main__":
     url = sys.argv[1]
-    transcribeAllEpisodes(url)
+    fname = sys.argv[2]
+    transcribeAllEpisodes(url,fname)
